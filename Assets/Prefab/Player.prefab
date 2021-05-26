@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 119921188}
   m_Layer: 6
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -163,6 +163,8 @@ MonoBehaviour:
   wallLayer:
     serializedVersion: 2
     m_Bits: 512
+  downWallCheckY: -2.1
+  groundCheckOffsetX: 0.4
   bubble: {fileID: 448797218365540072, guid: 1c788648f80d5294db1df52eafe6193a, type: 3}
   bubbleSpawnPos: {fileID: 7156612519854105566}
   minX: -13
@@ -191,7 +193,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5210198225511595242}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.02, y: 0.01, z: 0}
+  m_LocalPosition: {x: 1.07, y: 0.01, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 6855123669501228324}

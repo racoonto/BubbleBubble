@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -23,23 +24,82 @@ public class Bubble : MonoBehaviour
         //rigidbody2D.gravityScale = gravityScale;
     }
 
+    public LayerMask wallLayer;
+
     private void FixedUpdate()
     {
         if (currentFrame++ < moveForwardFrame)
         {
             var pos = rigidbody2D.position;
             pos.x += (speed * transform.forward.z);
+
+            //버블이 앞으로 가고 있으면 최대 x값을 레이 쏘아서 찾기
+            //뒤로가고 있으면 최소 x값을 레이 쏘아서 찾기
+            if (transform.forward.z > 0) // 앞으로 가고 있다.
+            {
+                //최대 x 값 찾자.
+                //wallLayer = LayerMask.NameToLayer("Wall");
+                var hit = Physics2D.Raycast(transform.position, new Vector2(1, 0), 100f, wallLayer);
+                Debug.Assert(hit.transform != null, "벽 레이어 없음. 확인");
+                if (hit.transform)
+                {
+                    float maxX = hit.point.x;
+                    pos.x = Mathf.Min(pos.x, maxX);
+                }
+            }
+            else
+            {
+                var hit = Physics2D.Raycast(transform.position, new Vector2(-1, 0), 100f, wallLayer);
+                float minX = hit.point.x;
+                pos.x = Mathf.Min(pos.x, minX);
+            }
+
             rigidbody2D.position = pos;
         }
         else
         {
+            state = State.FreeFly;
             rigidbody2D.gravityScale = gravityScale;
             enabled = false;
         }
     }
 
+    public enum State
+    {
+        FastMove,
+        FreeFly,
+        //Explosion
+    }
+
+    public State state = State.FastMove;
+
+    private void OnTouchCollision(Transform tr)
+    {
+        if (state == State.FreeFly)
+        {
+            if (tr.CompareTag("Player"))
+            {
+                //플레이어
+                Destroy(gameObject);
+            }
+        }
+    }
+
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        //버블이 터질만큼 붙어 있다면 터트리자.
+        //버블끼리, 벽에 닿았을 때
+
+        Debug.Log("Collision:" + collision.transform.name);
+
+        //버블이 플레이어에 닿았을 때
+        OnTouchCollision(collision.transform);
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        //플레이어가 점프할 때
+        //트리거 벽
+        Debug.Log("Trigger:" + collision.transform.name);
+        OnTouchCollision(collision.transform);
     }
 }

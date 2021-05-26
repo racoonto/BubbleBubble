@@ -100,6 +100,7 @@ public class Player : MonoBehaviour
             bool isGround = IsGround();
             if (isGround)
             {
+                rigidbody2D.velocity = Vector2.zero; // 물리충돌하면서 갑자기 속도가 빨라지는 경우 방지
                 rigidbody2D.AddForce(new Vector2(0, jumpForce));
                 collider2D.isTrigger = true; //점프할 때 벽을 뚫고 싶다.
             }

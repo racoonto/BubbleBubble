@@ -156,9 +156,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveForwardFrame: 6
+  currentFrame: 0
   speed: 1.4
   rigidbody2D: {fileID: 0}
   gravityScale: -0.7
+  wallLayer:
+    serializedVersion: 2
+    m_Bits: 512
 --- !u!114 &-165094684909596505
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -171,7 +175,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95737d8fd37c2204abca9dbb93c56a06, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  destroyTime: 10
+  destroyTime: 20
   OnEnableLog: 0
   OnDisableLog: 0
   OnDestroyLog: 0
