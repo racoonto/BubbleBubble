@@ -112,7 +112,15 @@ public class Player : MonoBehaviour
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
-        Gizmos.DrawRay(transform.position, new Vector2(0, -1) * 1.1f);
+        //Gizmos.DrawRay(transform.position, new Vector2(0, -1) * 1.1f);
+        DrawyRay(transform.position);
+        DrawyRay(transform.position + new Vector3(-groundCheckOffsetX, 0, 0)); //좌
+        DrawyRay(transform.position + new Vector3(groundCheckOffsetX, 0, 0)); //우
+    }
+
+    private void DrawyRay(Vector3 position)
+    {
+        Gizmos.DrawRay(position, new Vector2(0, -1) * 1.1f);
     }
 
     private bool IsGround()
