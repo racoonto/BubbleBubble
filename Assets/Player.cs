@@ -81,13 +81,19 @@ public class Player : MonoBehaviour
     //    ingDownJump = false;
     //}
 
+    private bool ingJump = false;//점프하자마자 밑으로 점프하면 발생하는 버그 수정.
+
     private void Jump()
     {
-        if (ingDownJump == false)
+        if (ingJump)
         {
-            //낙하할 때는 지면과 충돌하도록 isTrigger을 꺼주자.
-            if (rigidbody2D.velocity.y < 0)
-                collider2D.isTrigger = false;
+            if (ingDownJump == false)
+            {
+                ingJump = false;
+                //낙하할 때는 지면과 충돌하도록 isTrigger을 꺼주자.
+                if (rigidbody2D.velocity.y < 0)
+                    collider2D.isTrigger = false; // 점프하고 나서 뚫은 벽에 서고 싶다.
+            }
         }
 
         //if (rigidbody2D.velocity.y == 0) //공중에서 점프를 막고 싶다.
@@ -103,6 +109,7 @@ public class Player : MonoBehaviour
                 rigidbody2D.velocity = Vector2.zero; // 물리충돌하면서 갑자기 속도가 빨라지는 경우 방지
                 rigidbody2D.AddForce(new Vector2(0, jumpForce));
                 collider2D.isTrigger = true; //점프할 때 벽을 뚫고 싶다.
+                ingJump = true;
             }
         }
         //}
