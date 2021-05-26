@@ -3818,7 +3818,7 @@ CompositeCollider2D:
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
-  m_GeometryType: 0
+  m_GeometryType: 1
   m_GenerationType: 0
   m_EdgeRadius: 0
   m_ColliderPaths:
@@ -4186,10 +4186,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 7156612519854105566, guid: e62a2b3f7b9c22441a800c772604a33c, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 1.07
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e62a2b3f7b9c22441a800c772604a33c, type: 3}
 --- !u!1001 &769793180
@@ -4414,10 +4410,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: -165094684909596505, guid: 1c788648f80d5294db1df52eafe6193a, type: 3}
-      propertyPath: destroyTime
-      value: 20
-      objectReference: {fileID: 0}
     - target: {fileID: 448797218365540072, guid: 1c788648f80d5294db1df52eafe6193a, type: 3}
       propertyPath: m_Name
       value: Bubble

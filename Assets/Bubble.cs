@@ -51,7 +51,7 @@ public class Bubble : MonoBehaviour
             {
                 var hit = Physics2D.Raycast(transform.position, new Vector2(-1, 0), 100f, wallLayer);
                 float minX = hit.point.x;
-                pos.x = Mathf.Min(pos.x, minX);
+                pos.x = Mathf.Max(pos.x, minX);
             }
 
             rigidbody2D.position = pos;
