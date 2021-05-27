@@ -109,7 +109,7 @@ public class Bubble : MonoBehaviour
     {
         //버블끼리, 벽에 닿았을 때
 
-        Debug.Log("Collision:" + collision.transform.name);
+        //Debug.Log("Collision:" + collision.transform.name);
 
         //버블이 플레이어에 닿았을 때
         OnTouchCollision(collision.transform);

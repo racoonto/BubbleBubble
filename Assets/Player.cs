@@ -14,14 +14,14 @@ public class Player : MonoBehaviour
     public float wallOffset = 0.02f;
 
     //bool ingDownJump = false;
-    private bool ingJump = false;
+    //private bool ingJump = false;
 
     public enum StateType
     {
         Ground,
         Jump,
         DownJump,
-        DownJumpExitCollider,
+        DownJumpExitCollider, // 다운점프 후 미텡 있는 벽 통과 끝 -> 따으올 떨어지는 중
     }
 
     // public이 아니지만 인스펙터에 노출
@@ -32,7 +32,7 @@ public class Player : MonoBehaviour
         get { return state; }
         set
         {
-            Log.Print($"{state} -> {value}", OptionType.Player상태변화로그);
+            Log.Print($"<color=#ff0000> {state} -> {value}  </color>", OptionType.Player상태변화로그);
             state = value;
         }
     }
@@ -62,7 +62,7 @@ public class Player : MonoBehaviour
             checkPosition.x = rightmostHit.point.x - 1.01f; //오른쪽 끝벽에서 안쪽으로 들어온 1.01f 값을 뺌. 안쪽벽의 위치를 구하기 위해서.벽위 두께 고려
             var hit = Physics2D.Raycast(checkPosition, Vector2.left, 1f, wallLayer);
 
-            Debug.Log(rightmostHit.point.x); //15, 14
+            //Debug.Log(rightmostHit.point.x); //15, 14
             if (hit.transform == null) //hit의 위치값이 없으면 break
             {
                 break;
@@ -72,7 +72,7 @@ public class Player : MonoBehaviour
             //12.99
             //rightmostHit 13.99
         }
-        Debug.Log("최종 오른쪽벽 위치" + rightmostHit.point.x);
+        //Debug.Log("최종 오른쪽벽 위치" + rightmostHit.point.x);
         float wallWidth = 1f;
         maxX = rightmostHit.point.x - wallWidth - collider2D.radius; //maxX는 오른쪽 끝벽 - 벽 두께 - 캐릭터 반지름
 
@@ -86,7 +86,7 @@ public class Player : MonoBehaviour
             checkPosition.x = leftmostHit.point.x + 1.01f; //오른쪽 끝벽에서 안쪽으로 들어온 1.01f 값을 뺌. 안쪽벽의 위치를 구하기 위해서.벽위 두께 고려
             var hit = Physics2D.Raycast(checkPosition, Vector2.right, 1f, wallLayer);
 
-            Debug.Log(leftmostHit.point.x); // -15, -14
+            //Debug.Log(leftmostHit.point.x); // -15, -14
             if (hit.transform == null) //hit의 위치값이 없으면 break
             {
                 break;
@@ -102,7 +102,7 @@ public class Player : MonoBehaviour
 
         var hit1 = Physics2D.Raycast(checkPosition, Vector2.left, 2f, wallLayer);
         leftmostHit = hit1;
-        Debug.Log("최종 왼쪽 벽 위치" + leftmostHit.point.x);
+        //Debug.Log("최종 왼쪽 벽 위치" + leftmostHit.point.x);
         minX = leftmostHit.point.x + collider2D.radius + wallOffset; //maxX는 오른쪽 끝벽 + 캐릭터 반지름 + 약간 띄어줌
 
         //RaycastHit2D Leftmost = new RaycastHit2D();
@@ -187,7 +187,9 @@ public class Player : MonoBehaviour
 
     private void DownJump()
     {
-        if (ingJump)
+        //if (ingJump)
+        //    return;
+        if (State != StateType.Ground)
             return;
 
         // s키 누르면 아래로 점프
@@ -205,6 +207,7 @@ public class Player : MonoBehaviour
                     , new Vector2(0, -1), 100, groundLayer);
                 if (hit.transform)
                 {
+                    //Debug.Log($"{transform.position} {hit.point}, {hit.transform.name}"); //버그 잡기 위해 레이위치를 명확하게 확인
                     State = StateType.DownJump;
                     collider2D.isTrigger = true;
                 }
@@ -214,7 +217,7 @@ public class Player : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        Log.Print("T Enter " + collision.transform.name, OptionType.ShowCollideLog);
+        //Debug.Log("T Enter " + collision.transform.name + OptionType.ShowCollideLog);
 
         if (State == StateType.DownJumpExitCollider)
         {
@@ -227,7 +230,7 @@ public class Player : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        Log.Print("T Exit  " + collision.transform.name, OptionType.ShowCollideLog);
+        //Debug.Log("T Exit  " + collision.transform.name + OptionType.ShowCollideLog);
         if (State == StateType.DownJump)
         {
             State = StateType.DownJumpExitCollider; // Ground혹은 밑으로 점프중.
@@ -237,7 +240,7 @@ public class Player : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        Log.Print("C Enter " + collision.transform.name, OptionType.ShowCollideLog);
+        //Debug.Log("C Enter " + collision.transform.name + OptionType.ShowCollideLog);
         if (State == StateType.DownJumpExitCollider) // 아래 벽과 (옆+천장)벽을 분리 해야함
         {
             if (IsGround())
@@ -247,7 +250,7 @@ public class Player : MonoBehaviour
 
     private void OnCollisionExit2D(Collision2D collision)
     {
-        Log.Print("C Exit  " + collision.transform.name, OptionType.ShowCollideLog);
+        Debug.Log("C Exit  " + collision.transform.name + OptionType.ShowCollideLog);
     }
 
     private void Jump()

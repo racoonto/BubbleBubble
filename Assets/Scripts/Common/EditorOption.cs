@@ -5,7 +5,7 @@ public static class Log
 {
     public static void Print(string log, OptionType optionType)
     {
-        if (EditorOption.Options[optionType] == false)
+        if (EditorOption.Options[optionType] == false) //옵션 메뉴가 켜져 있을 때만 Tool > Option 확인
             return;
 
         Debug.Log(log);
