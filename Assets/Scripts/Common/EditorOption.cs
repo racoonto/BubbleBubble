@@ -1,11 +1,22 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+public static class Log
+{
+    public static void Print(string log, OptionType optionType)
+    {
+        if (EditorOption.Options[optionType] == false)
+            return;
+
+        Debug.Log(log);
+    }
+}
+
 public enum OptionType
 {
     StartIndex = -1,
-    SuperPlayer,
-    DisableEnemy,
+    ShowCollideLog,
+    Player상태변화로그,
     LastIndex
 }
 
@@ -26,7 +37,8 @@ public class EditorOption
         }
     }
 
-    static Dictionary<OptionType, bool> m_DevOption;
+    private static Dictionary<OptionType, bool> m_DevOption;
+
     static public void InitDevOptionValue()
     {
         if (m_DevOption == null)

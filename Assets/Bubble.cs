@@ -9,12 +9,22 @@ public class Bubble : MonoBehaviour
     public int currentFrame = 0;
     public float speed = 0.7f;
     new public Rigidbody2D rigidbody2D;
+    new public CircleCollider2D collider2D;
     public float gravityScale = -0.7f;
+
+    public enum State
+    {
+        FastMove,
+        FreeFly,
+        //Explosion
+    }
+
     //앞쪽 방향으로 이동. 6프레임 움직이고 나서 위로 이동(중력에 의해)
 
     private void Start()
     {
         rigidbody2D = GetComponent<Rigidbody2D>();
+        collider2D = GetComponent<CircleCollider2D>();
         rigidbody2D.gravityScale = 0;
         //for (int i = 0; i < moveForwardFrame; i++)
         //{
@@ -25,6 +35,8 @@ public class Bubble : MonoBehaviour
     }
 
     public LayerMask wallLayer;
+    public LayerMask playerLayer;
+    // 벽과 이미 충돌한상태로 생성되면 충돌되지 않음 <- 이 상황에선 버블이 터져야함.
 
     private void FixedUpdate()
     {
@@ -58,17 +70,20 @@ public class Bubble : MonoBehaviour
         }
         else
         {
-            state = State.FreeFly;
-            rigidbody2D.gravityScale = gravityScale;
-            enabled = false;
+            //플레이어와 닿아 있다면 거품을 터뜨리자
+            var allCollides = Physics2D.OverlapCircleAll(transform.position, collider2D.radius, playerLayer);
+            if (allCollides.Length > 0)
+            {
+                Explosion();
+            }
+            else
+            {
+                collider2D.isTrigger = false;
+                state = State.FreeFly;
+                rigidbody2D.gravityScale = gravityScale;
+                enabled = false;
+            }
         }
-    }
-
-    public enum State
-    {
-        FastMove,
-        FreeFly,
-        //Explosion
     }
 
     public State state = State.FastMove;
@@ -79,10 +94,15 @@ public class Bubble : MonoBehaviour
         {
             if (tr.CompareTag("Player"))
             {
-                //플레이어
-                Destroy(gameObject);
+                //플레이어면 버블 폭발
+                Explosion();
             }
         }
+    }
+
+    private void Explosion()
+    {
+        Destroy(gameObject);
     }
 
     private void OnCollisionEnter2D(Collision2D collision)

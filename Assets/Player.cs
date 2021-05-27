@@ -1,24 +1,113 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class Player : MonoBehaviour
 {
     public float speed = 0.1f;
     public Animator animator;
-    new public Rigidbody2D rigidbody2D;
     new public Collider2D collider2D;
-    public float jumpForce = 1000f;
+    new public Rigidbody2D rigidbody2D;
+    public float jumpForce = 100f;
+    public float wallOffset = 0.001f;
+
+    public enum StateType
+    {
+        Ground,
+        Jump,
+        DownJump,
+        DownJumpExitCollider,
+    }
+
+    // public이 아니지만 인스펙터에 노출
+    [SerializeField] private StateType state = StateType.Ground;
+
+    private StateType State
+    {
+        get { return state; }
+        set
+        {
+            Log.Print($"{state} -> {value}", OptionType.Player상태변화로그);
+            state = value;
+        }
+    }
+
+    //bool ingDownJump = false;
+    //bool ingJump = false;
 
     private void Awake()
     {
         rigidbody2D = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
         collider2D = GetComponent<Collider2D>();
-
-        //옛날 게임이라 Time.deltatime은 안쓰고 프레임레이트를 정해주었음.
         Application.targetFrameRate = 60;
+
+        //minX, maxX값을  인스펙터에서 넣으니깐 제대로 넣지 않을 경우 좌우 벽에 붙어 있는 문제 발생 -> trigger Stage상태 유지.
+        // -> 프로그래밍적으로 할당하자.
+        // 좌우로 레이를 쏘아서 마지막 벽을 min, max로 할당.
+
+        RaycastHit2D rightmostHit = new RaycastHit2D();
+        RaycastHit2D Leftmost = new RaycastHit2D();
+        RaycastHit2D hit;
+        Vector2 checkPosition = transform.position;
+        int count = 0;
+        List<RaycastHit2D> hits = new List<RaycastHit2D>();
+        float wallWidth = 1.01f;
+        while (count++ < 10) // 최대 10회만 검사.
+        {
+            hit = Physics2D.Raycast(checkPosition, Vector2.right, 100f, wallLayer);
+            if (hit.transform == null)
+                break;
+            hits.Add(hit);
+            rightmostHit = hit; // 마지막 벽이 2중 벽일때 바로 앞에 벽을 마지막 오른쪽 벽으로 하자.
+            checkPosition.x = hit.point.x + wallWidth; //
+        };
+
+        if (hits.Count >= 2)
+        {
+            var previousHit = hits[hits.Count - 2];
+            if (rightmostHit.point.x < previousHit.point.x + wallWidth + 0.01f)
+            {
+                rightmostHit = previousHit;
+            }
+        }
+
+        count = 0;
+        hits.Clear();
+        checkPosition = transform.position;
+        while (count++ < 10) // 최대 10회만 검사.
+        {
+            hit = Physics2D.Raycast(checkPosition, Vector2.left, 100f, wallLayer);
+            if (hit.transform == null)
+                break;
+            hits.Add(hit);
+            Leftmost = hit;
+            checkPosition.x = hit.point.x - 1.01f; // 1.01은 벽 두께
+        };
+
+        if (hits.Count >= 2)
+        {
+            var previousHit = hits[hits.Count - 2];
+            if (Leftmost.point.x > previousHit.point.x - wallWidth - 0.01f)
+            {
+                Leftmost = previousHit;
+
+                if (hits.Count >= 3) // 왼쪽은 3중벽이어서 추가 확인
+                {
+                    previousHit = hits[hits.Count - 3];
+                    if (Leftmost.point.x > previousHit.point.x - wallWidth - 0.01f)
+                    {
+                        Leftmost = previousHit;
+                    }
+                }
+            }
+        }
+
+        float halfSize = collider2D.bounds.size.x * 0.5f + wallOffset;
+        maxX = rightmostHit.point.x - halfSize;
+        minX = Leftmost.point.x + halfSize;
     }
 
     private void Update()
@@ -31,130 +120,147 @@ public class Player : MonoBehaviour
         // 점프
         Jump();
 
-        // 아래로 점프
+        // 아래로점프
         DownJump();
     }
 
     public LayerMask wallLayer;
-    public float downWallCheckY = -2.1f; //바닥까지의 거리
+    public LayerMask groundLayer;
+    public float downWallCheckY = -2.1f;
 
     private void DownJump()
     {
-        //s키 누르면 아래로 점프
-        if (Input.GetKeyDown(KeyCode.S))
+        // s키 누르면 아래로 점프
+        if (State == StateType.Ground)
         {
-            //점프 가능한 상황인지 확인
-            // 아래로 광선을 쏴서 벽이 있다면 아래로 점프
-            var hit = Physics2D.Raycast(transform.position + new Vector3(0, downWallCheckY, 0), new Vector2(0, -1), 100, wallLayer); // 아래로 광선 쏘기
-            if (hit.transform) //위치값을 반환한다면
+            if (Input.GetKeyDown(KeyCode.S))
             {
-                ingDownJump = true;
-                collider2D.isTrigger = true;
-                //Debug.Log($"{hit.point}, {hit.transform.name}");
+                if (IsGround() == false)
+                    return;
 
-                //StartCoroutine(DownJumco());
+                // 점프 가능한 상황인지 확인
+                //  아래로 광선을 쏘아서 벽이 있다면 아래로 점프를 하자
+                var hit = Physics2D.Raycast(
+                    transform.position + new Vector3(0, downWallCheckY, 0)
+                    , new Vector2(0, -1), 100, groundLayer);
+                if (hit.transform)
+                {
+                    State = StateType.DownJump;
+                    collider2D.isTrigger = true;
+                }
             }
         }
     }
 
-    private bool ingDownJump = false;
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        Log.Print("T Enter " + collision.transform.name, OptionType.ShowCollideLog);
+
+        if (State == StateType.DownJumpExitCollider)
+        {
+            // 밑에 벽이 있다면 그라운드.(옆에 벽에 부딪힌것일 수도 있다. -> 옆에 벽에 부딪힌후 밑에 벽에 부 딪힌다면 총돌 신호가 1번만 온다)
+            // 벽과 바닥을 다른 타일로 만들어서 구분 해야한다.
+            if (IsGround())
+                State = StateType.Ground;
+        }
+    }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (ingDownJump)
+        Log.Print("T Exit  " + collision.transform.name, OptionType.ShowCollideLog);
+        if (State == StateType.DownJump)
         {
-            ingDownJump = false;
+            State = StateType.DownJumpExitCollider; // Ground혹은 밑으로 점프중.
             collider2D.isTrigger = false;
         }
     }
 
-    //시간으로 처리 안하고 트리거로 아래로 내려가기.
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        Log.Print("C Enter " + collision.transform.name, OptionType.ShowCollideLog);
+        if (State == StateType.DownJumpExitCollider) // 아래 벽과 (옆+천장)벽을 분리 해야함
+        {
+            if (IsGround())
+                State = StateType.Ground;
+        }
+    }
 
-    //public float downJumpTime = 0.4f;
-
-    //private IEnumerator DownJumco()
-    //{
-    //    ingDownJump = true;
-    //    collider2D.isTrigger = true;
-    //    yield return new WaitForSeconds(downJumpTime);
-    //    collider2D.isTrigger = false;
-    //    ingDownJump = false;
-    //}
-
-    //private bool ingJump = false;//점프하자마자 밑으로 점프하면 발생하는 버그 수정.
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        Log.Print("C Exit  " + collision.transform.name, OptionType.ShowCollideLog);
+    }
 
     private void Jump()
     {
-        // if (ingJump)
-        // {
-        if (ingDownJump == false)
+        // 낙하할때는 지면과 충돌하도록 isTrigger를 꺼주자.
+        if (State == StateType.Jump)
         {
-            //ingJump = false;
-            //낙하할 때는 지면과 충돌하도록 isTrigger을 꺼주자.
             if (rigidbody2D.velocity.y < 0)
-                collider2D.isTrigger = false; // 점프하고 나서 뚫은 벽에 서고 싶다.
-        }
-        // }
-
-        //if (rigidbody2D.velocity.y == 0) //공중에서 점프를 막고 싶다.
-        //{
-        // 방향키 위 혹은 W키 누르면 점프 하자.
-        if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
-        {
-            //바닥에 붙어 있으면 점프 할 수 있게
-            //광선으로
-            bool isGround = IsGround();
-            if (isGround)
             {
-                rigidbody2D.velocity = Vector2.zero; // 물리충돌하면서 갑자기 속도가 빨라지는 경우 방지
-                rigidbody2D.AddForce(new Vector2(0, jumpForce));
-                collider2D.isTrigger = true; //점프할 때 벽을 뚫고 싶다.
-                                             // ingJump = true;
+                if (IsGround())
+                {
+                    State = StateType.Ground;
+                    collider2D.isTrigger = false; // 점프하고 나서 뚫은 벽에 서고싶다.
+                }
             }
         }
-        //}
+        // 방향위혹은 W키 누르면 점프 하자.
+        if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
+        {
+            // 우리가 바닥에 붙어 있으면 점프 할 수 있게 하자.
+            //bool isGround = IsGround();
+            if (State == StateType.Ground)
+            {
+                rigidbody2D.velocity = Vector2.zero;
+                rigidbody2D.AddForce(new Vector2(0, jumpForce));
+                collider2D.isTrigger = true; // 점프할때 벽을 뚫고 싶다.
+                State = StateType.Jump;
+            }
+        }
     }
 
     public float groundCheckOffsetX = 0.4f;
 
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
-        //Gizmos.DrawRay(transform.position, new Vector2(0, -1) * 1.1f);
-        DrawyRay(transform.position);
-        DrawyRay(transform.position + new Vector3(-groundCheckOffsetX, 0, 0)); //좌
-        DrawyRay(transform.position + new Vector3(groundCheckOffsetX, 0, 0)); //우
-    }
-
-    private void DrawyRay(Vector3 position)
-    {
-        Gizmos.DrawRay(position, new Vector2(0, -1) * 1.1f);
-    }
-
     private bool IsGround()
     {
-        //자기 위치, 좌우로 0.4f만큼 바닥이 있으면 바닥에 있음
+        //return rigidbody2D.velocity.y == 0;
 
-        bool result = false;
+        // 밑으로 광선을 쏘아서 부딪히는게 있으면 우리는 바닥에 있다.
+        // 자기위치, 그리고 좌우로 0.4f만큼 바닥이 있으면 나는 바닥에 있다.
 
-        //밑으로 광선을 쏘아서 부딪히는게 있으면 바닥임
         if (IsGroundCheckRay(transform.position))
             return true;
 
-        //좌
+        // 좌.
         if (IsGroundCheckRay(transform.position + new Vector3(-groundCheckOffsetX, 0, 0)))
             return true;
 
-        //우
+        // 우.
         if (IsGroundCheckRay(transform.position + new Vector3(groundCheckOffsetX, 0, 0)))
             return true;
 
-        return result;
+        return false;
+    }
+
+    private void OnDrawGizmos()
+    {
+        DrawRay(transform.position);
+
+        // 좌.
+        DrawRay(transform.position + new Vector3(-groundCheckOffsetX, 0, 0));
+
+        // 우.
+        DrawRay(transform.position + new Vector3(groundCheckOffsetX, 0, 0));
+    }
+
+    private void DrawRay(Vector3 position)
+    {
+        Gizmos.DrawRay(position + new Vector3(0, downWallCheckY, 0), new Vector2(0, -1) * 1.1f);
     }
 
     private bool IsGroundCheckRay(Vector3 pos)
     {
-        var hit = Physics2D.Raycast(pos, new Vector2(0, -1), 1.1f, wallLayer);
+        var hit = Physics2D.Raycast(pos, new Vector2(0, -1), 1.1f, groundLayer);
         if (hit.transform)
             return true;
 
@@ -173,7 +279,7 @@ public class Player : MonoBehaviour
         }
     }
 
-    public float minX, maxX;
+    public float minX = -12.3f, maxX = 12.3f;
 
     private void Move()
     {
