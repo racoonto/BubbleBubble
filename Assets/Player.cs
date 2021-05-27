@@ -13,6 +13,9 @@ public class Player : MonoBehaviour
     public float jumpForce = 100f;
     public float wallOffset = 0.02f;
 
+    //bool ingDownJump = false;
+    private bool ingJump = false;
+
     public enum StateType
     {
         Ground,
@@ -34,9 +37,6 @@ public class Player : MonoBehaviour
         }
     }
 
-    //bool ingDownJump = false;
-    //bool ingJump = false;
-
     private void Awake()
     {
         rigidbody2D = GetComponent<Rigidbody2D>();
@@ -48,7 +48,7 @@ public class Player : MonoBehaviour
         // -> 프로그래밍적으로 할당하자.
         // 좌우로 레이를 쏘아서 마지막 벽을 min, max로 할당.
 
-        RaycastHit2D rightmostHit = new RaycastHit2D();
+        RaycastHit2D rightmostHit;
         Vector2 checkPosition = transform.position;
 
         //오른쪽 벽 구하기
@@ -60,7 +60,7 @@ public class Player : MonoBehaviour
         while (count++ < 10)
         {
             checkPosition.x = rightmostHit.point.x - 1.01f; //오른쪽 끝벽에서 안쪽으로 들어온 1.01f 값을 뺌. 안쪽벽의 위치를 구하기 위해서.벽위 두께 고려
-            var hit = Physics2D.Raycast(checkPosition, Vector2.left, 100f, wallLayer);
+            var hit = Physics2D.Raycast(checkPosition, Vector2.left, 1f, wallLayer);
 
             Debug.Log(rightmostHit.point.x); //15, 14
             if (hit.transform == null) //hit의 위치값이 없으면 break
@@ -72,7 +72,7 @@ public class Player : MonoBehaviour
             //12.99
             //rightmostHit 13.99
         }
-        Debug.Log("최종 벽 위치" + rightmostHit.point.x);
+        Debug.Log("최종 오른쪽벽 위치" + rightmostHit.point.x);
         float wallWidth = 1f;
         maxX = rightmostHit.point.x - wallWidth - collider2D.radius; //maxX는 오른쪽 끝벽 - 벽 두께 - 캐릭터 반지름
 
@@ -84,7 +84,7 @@ public class Player : MonoBehaviour
         while (count++ < 10)
         {
             checkPosition.x = leftmostHit.point.x + 1.01f; //오른쪽 끝벽에서 안쪽으로 들어온 1.01f 값을 뺌. 안쪽벽의 위치를 구하기 위해서.벽위 두께 고려
-            var hit = Physics2D.Raycast(checkPosition, Vector2.right, 100f, wallLayer);
+            var hit = Physics2D.Raycast(checkPosition, Vector2.right, 1f, wallLayer);
 
             Debug.Log(leftmostHit.point.x); // -15, -14
             if (hit.transform == null) //hit의 위치값이 없으면 break
@@ -187,6 +187,9 @@ public class Player : MonoBehaviour
 
     private void DownJump()
     {
+        if (ingJump)
+            return;
+
         // s키 누르면 아래로 점프
         if (State == StateType.Ground)
         {
@@ -346,8 +349,8 @@ public class Player : MonoBehaviour
         if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) moveX = 1;
         Vector3 position = transform.position;
         position.x = position.x + moveX * speed;
-        position.x = Mathf.Max(minX, position.x);
         position.x = Mathf.Min(maxX, position.x);
+        position.x = Mathf.Max(minX, position.x);
         transform.position = position;
 
         if (animator.GetCurrentAnimatorStateInfo(0).IsName("attack") == false)

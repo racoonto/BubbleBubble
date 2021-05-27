@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class TimeController : MonoBehaviour
 {
@@ -38,8 +39,7 @@ public class TimeController : MonoBehaviour
         // F1키 누르면 재시작( 타임 콘트롤과 관련 없으므로 비슷한 기능 모였을때 다른 클래스로 빼자)
         if (Input.GetKeyDown(KeyCode.F1))
         {
-            UnityEngine.SceneManagement.SceneManager.LoadScene(
-                UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
     }
 }
