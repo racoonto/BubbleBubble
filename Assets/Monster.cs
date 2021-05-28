@@ -8,6 +8,7 @@ public class Monster : MonoBehaviour
     //절벽 만나면 방향 전환
 
     private new Rigidbody2D rigidbody2D;
+    public string monsterName;
 
     private void Awake()
     {

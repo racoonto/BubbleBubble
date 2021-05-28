@@ -17,6 +17,7 @@ public class Bubble : MonoBehaviour
     {
         FastMove,
         FreeFly,
+        Capture,
         //Explosion
     }
 
@@ -108,6 +109,7 @@ public class Bubble : MonoBehaviour
     public float nearPlayerCheckDistance = 1.9f;
 
     public State state = State.FastMove;
+    public float JumpHeight = 0.5f; //플레이어가 버블 밟은걸로 인정되는 높이.
 
     private void OnTouchCollision(Transform tr)
     {
@@ -115,8 +117,39 @@ public class Bubble : MonoBehaviour
         {
             if (tr.CompareTag("Player"))
             {
-                //플레이어면 버블 폭발
-                Explosion();
+                //플레이어가 나보다 높게 있다면
+                //플레이어가 방향키를 위로 하고 있다면
+                bool pressedUpkey = Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow);
+                if (pressedUpkey && (transform.position.y + JumpHeight < tr.position.y))
+                {
+                    //버블을 터트리지 말고 놔주다.
+                    //작아졌다가 커지는 트윈효과 주자.
+                    tr.GetComponent<Player>().StartJump();
+                }
+                else
+                {
+                    //플레이어면 버블 폭발
+                    Explosion();
+                }
+            }
+        }
+        else if (state == State.FastMove)
+        {
+            if (tr.CompareTag("Enemy"))
+            {
+                // 적을 안보이게 하자.
+                tr.gameObject.SetActive(false);
+                // 버블 트랜스폼에 자식으로 달자.
+                tr.parent = transform; // = tr.SetParent(transform);
+
+                //버블의 상태를 캡쳐 상태로 변경.
+                state = State.Capture;
+                string monsterName = tr.GetComponent<Monster>().monsterName;
+                //버블 이미지를 해당 몬스터 잡은 애니메이션을 플레이하자
+                GetComponent<Animator>().Play(monsterName + "Bubble");
+
+                //버블이 몇초 후에 터짐
+                //파랑 녹색 -> 빨간색
             }
         }
     }
