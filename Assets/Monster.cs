@@ -1,9 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Monster : MonoBehaviour
 {
+    public static List<Monster> monsters = new List<Monster>();
+
     // 앞으로 움직이자.
     //절벽 만나면 방향 전환
 
@@ -12,7 +15,17 @@ public class Monster : MonoBehaviour
 
     private void Awake()
     {
+        monsters.Add(this);
         rigidbody2D = GetComponent<Rigidbody2D>();
+    }
+
+    private void OnDestroy()
+    {
+        monsters.Remove(this);
+        if (monsters.Count == 0)
+        {
+            SceneManager.LoadScene("Stage2");
+        }
     }
 
     public float speed = 0.1f;
