@@ -169,6 +169,14 @@ public class Player : MonoBehaviour
         //minX = Leftmost.point.x + halfSize;
     }
 
+    internal void StartJump()
+    {
+        rigidbody2D.velocity = Vector2.zero;
+        rigidbody2D.AddForce(new Vector2(0, jumpForce));
+        collider2D.isTrigger = true; // 점프할때 벽을 뚫고 싶다.
+        State = StateType.Jump;
+    }
+
     private void Update()
     {
         FireBubble();
@@ -276,10 +284,7 @@ public class Player : MonoBehaviour
             //bool isGround = IsGround();
             if (State == StateType.Ground)
             {
-                rigidbody2D.velocity = Vector2.zero;
-                rigidbody2D.AddForce(new Vector2(0, jumpForce));
-                collider2D.isTrigger = true; // 점프할때 벽을 뚫고 싶다.
-                State = StateType.Jump;
+                StartJump();
             }
         }
     }

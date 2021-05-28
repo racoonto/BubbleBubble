@@ -156,19 +156,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53a34d612e058e841b58e9a34744be86, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveForwardFrame: 6
+  moveForwardFrame: 10
   currentFrame: 0
-  speed: 1.4
+  speed: 0.4
   rigidbody2D: {fileID: 0}
   collider2D: {fileID: 0}
-  gravityScale: -0.7
+  gravityScale: -0.2
   wallLayer:
     serializedVersion: 2
     m_Bits: 512
   playerLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
+  nearPlayerCheckDistance: 1.9
   state: 0
+  nearBubbleDistance: 2.2
 --- !u!114 &-165094684909596505
 MonoBehaviour:
   m_ObjectHideFlags: 0
