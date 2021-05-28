@@ -260,7 +260,7 @@ public class Player : MonoBehaviour
 
     private void OnCollisionExit2D(Collision2D collision)
     {
-        Debug.Log("C Exit  " + collision.transform.name + OptionType.ShowCollideLog);
+        //Debug.Log("C Exit  " + collision.transform.name + OptionType.ShowCollideLog);
     }
 
     private void Jump()

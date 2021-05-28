@@ -170,6 +170,13 @@ MonoBehaviour:
     m_Bits: 64
   nearPlayerCheckDistance: 1.9
   state: 0
+  JumpHeight: 0.5
+  grabedMonster: {fileID: 0}
+  bubbleExplosionTime:
+  - 1
+  - 1
+  - 1
+  - 1
   nearBubbleDistance: 2.2
 --- !u!114 &-165094684909596505
 MonoBehaviour:

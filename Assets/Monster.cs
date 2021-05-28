@@ -8,7 +8,7 @@ public class Monster : MonoBehaviour
     //절벽 만나면 방향 전환
 
     private new Rigidbody2D rigidbody2D;
-    public string monsterName;
+    public string monsterName = "MonsterA";
 
     private void Awake()
     {
@@ -26,6 +26,7 @@ public class Monster : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        //Debug.Log(collision.name);
         if (collision.transform.CompareTag("TurnTrigger"))
         {
             var rotation = transform.rotation;

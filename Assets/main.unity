@@ -2447,7 +2447,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &850911075
 Transform:
   m_ObjectHideFlags: 0
@@ -4836,11 +4836,11 @@ GameObject:
   - component: {fileID: 1277380194}
   m_Layer: 0
   m_Name: TurnTrigger
-  m_TagString: Untagged
+  m_TagString: TurnTrigger
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1277380194
 Transform:
   m_ObjectHideFlags: 0
@@ -4921,8 +4921,7 @@ PrefabInstance:
       propertyPath: m_Name
       value: Monster
       objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 6538192618807589195, guid: fb1282254c4a2e642915ef7f9b7ec0ee, type: 3}
+    m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fb1282254c4a2e642915ef7f9b7ec0ee, type: 3}
 --- !u!1001 &1689971083
 PrefabInstance:
