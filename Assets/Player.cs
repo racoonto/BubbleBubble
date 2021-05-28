@@ -12,6 +12,7 @@ public class Player : MonoBehaviour
     new public Rigidbody2D rigidbody2D;
     public float jumpForce = 100f;
     public float wallOffset = 0.02f;
+    public static Player instance;
 
     //bool ingDownJump = false;
     //private bool ingJump = false;
@@ -39,6 +40,7 @@ public class Player : MonoBehaviour
 
     private void Awake()
     {
+        instance = this;
         rigidbody2D = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
         collider2D = GetComponent<CircleCollider2D>();

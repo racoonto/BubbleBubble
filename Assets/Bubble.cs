@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class Bubble : MonoBehaviour
 {
+    public static List<Bubble> Items = new List<Bubble>();
     public int moveForwardFrame = 6;
     public int currentFrame = 0;
     public float speed = 0.7f;
@@ -20,6 +21,17 @@ public class Bubble : MonoBehaviour
     }
 
     //앞쪽 방향으로 이동. 6프레임 움직이고 나서 위로 이동(중력에 의해)
+
+    private void Awake()
+    {
+        name = "Bubble" + (Items.Count + 1);
+        Items.Add(this);
+    }
+
+    private void OnDestroy()
+    {
+        Items.Remove(this);
+    }
 
     private void Start()
     {
@@ -78,13 +90,22 @@ public class Bubble : MonoBehaviour
             }
             else
             {
-                collider2D.isTrigger = false;
+                //공룡이 인근에 있으면 자신 버블을 터뜨리자.
+                float distance = Vector3.Distance(Player.instance.transform.position, transform.position); //플레이어와 버블의 거리
+                if (distance < nearPlayerCheckDistance)
+                {
+                    Explosion();
+                }
+
+                collider2D.isTrigger = false;//충돌 켜줌
                 state = State.FreeFly;
                 rigidbody2D.gravityScale = gravityScale;
                 enabled = false;
             }
         }
     }
+
+    public float nearPlayerCheckDistance = 1.9f;
 
     public State state = State.FastMove;
 
@@ -100,9 +121,39 @@ public class Bubble : MonoBehaviour
         }
     }
 
+    public float nearBubbleDistance = 2.2f;
+
     private void Explosion()
     {
+        //인근의 버블을 모두 터뜨리자.
+        //1.모든 버블에 접근
+        //2.인근의 있는 버블을 모으자.
+
+        //2.모은 버블을 터트리자.
+        Vector2 pos = transform.position;
+        List<Bubble> nearBubbles = new List<Bubble>();
+        nearBubbles.Add(this); //자기자신 추가
+        FindNearBubble(pos, nearBubbles);
+
+        nearBubbles.ForEach(x => Destroy(x.gameObject));
         Destroy(gameObject);
+    }
+
+    private void FindNearBubble(Vector2 pos, List<Bubble> nearBubbles)
+    {
+        foreach (var item in Items)
+        {
+            if (nearBubbles.Contains(item))
+                continue; //다음 아이템 선택
+
+            //pos 가까이(2.2)에 있는 버블을 모으자
+            float distance = Vector2.Distance(item.transform.position, pos);
+            if (distance < nearBubbleDistance)
+            {
+                nearBubbles.Add(item); //거리가 가까우면 nearBubble에 넣기
+                FindNearBubble(item.transform.position, nearBubbles); // 자기 자신을 호출하는 재귀함수
+            }
+        }
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
